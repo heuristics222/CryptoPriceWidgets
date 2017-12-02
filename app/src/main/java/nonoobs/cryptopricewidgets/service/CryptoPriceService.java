@@ -20,7 +20,7 @@ public class CryptoPriceService extends Service {
         CryptoAppWidgetLogger.info("CryptoPriceService.onCreate() called");
         mThread.start();
 
-        IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);x
+        IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         registerReceiver(mReceiver, filter);
     }

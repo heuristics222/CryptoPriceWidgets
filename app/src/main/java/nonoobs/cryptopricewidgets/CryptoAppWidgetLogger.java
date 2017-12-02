@@ -19,11 +19,11 @@ public class CryptoAppWidgetLogger {
     }
 
     static {
-        if ("google_sdk".equals(Build.PRODUCT) || "sdk".equals(Build.PRODUCT)) {
+        //if ("google_sdk".equals(Build.PRODUCT) || "sdk".equals(Build.PRODUCT)) {
             LOG_LEVEL = LogLevel.INFO;
-        } else {
-            LOG_LEVEL = LogLevel.ERROR;
-        }
+        //} else {
+        //    LOG_LEVEL = LogLevel.ERROR;
+        //}
     }
 
     public static void error(String msg) {

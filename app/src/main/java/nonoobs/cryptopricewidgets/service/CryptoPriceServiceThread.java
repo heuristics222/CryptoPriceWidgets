@@ -3,7 +3,11 @@ package nonoobs.cryptopricewidgets.service;
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
+import android.content.Intent;
+import android.content.pm.ResolveInfo;
 import android.widget.RemoteViews;
+
+import com.rvalerio.fgchecker.AppChecker;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -12,7 +16,9 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashSet;
 
+import nonoobs.cryptopricewidgets.AutoLogTimer;
 import nonoobs.cryptopricewidgets.CryptoAppWidgetLogger;
 import nonoobs.cryptopricewidgets.CryptoAppWidgetProvider;
 import nonoobs.cryptopricewidgets.R;
@@ -26,6 +32,7 @@ public class CryptoPriceServiceThread extends Thread {
     private boolean mStop = false;
     private Service mService;
 
+    private HashSet<String> mHomeList;
 
     public CryptoPriceServiceThread(Service s) {
         mService = s;
@@ -49,6 +56,8 @@ public class CryptoPriceServiceThread extends Thread {
     }
 
     public void run() {
+        refreshHomeList();
+
         while (!mStop) {
             updateGDAXPrice(mGdaxPrice);
             updateWidget(mGdaxPrice);
@@ -57,24 +66,39 @@ public class CryptoPriceServiceThread extends Thread {
 
             synchronized (this) {
                 try {
-                    wait(1000);
-                }
-                catch (InterruptedException e) {
+                    wait(isHomeShowing() ? 1000 : 5000);
+                } catch (InterruptedException e) {
                 }
 
                 while (mPaused && !mStop) {
                     CryptoAppWidgetLogger.info("CryptoPriceServiceThread paused");
                     try {
                         wait();
-                    }
-                    catch (InterruptedException e) {
+                    } catch (InterruptedException e) {
                     }
                     CryptoAppWidgetLogger.info("CryptoPriceServiceThread unpaused");
+                    refreshHomeList();
                 }
             }
         }
 
         CryptoAppWidgetLogger.info("CryptoPriceServiceThread ending");
+    }
+
+    private void refreshHomeList() {
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        mHomeList = new HashSet<>();
+        for (ResolveInfo info : mService.getPackageManager().queryIntentActivities(intent, 0)) {
+            mHomeList.add(info.activityInfo.packageName);
+        }
+    }
+
+    private boolean isHomeShowing() {
+        try (AutoLogTimer x = new AutoLogTimer("isHomeShowing")) {
+            String p = new AppChecker().getForegroundApp(mService.getApplicationContext());
+            return mHomeList.contains(p);
+        }
     }
 
     private static final double INVALID_VALUE = -1.0;
@@ -117,8 +141,7 @@ public class CryptoPriceServiceThread extends Thread {
             }
 
             priceData.unknown = false;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             CryptoAppWidgetLogger.info(e.toString());
         }
     }

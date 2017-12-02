@@ -8,20 +8,16 @@ import android.content.Intent;
  * Created by Doug on 2017-05-05.
  */
 
-public class CryptoPriceReceiver extends BroadcastReceiver
-{
+public class CryptoPriceReceiver extends BroadcastReceiver {
     CryptoPriceService mService;
 
-    public CryptoPriceReceiver(CryptoPriceService service)
-    {
+    public CryptoPriceReceiver(CryptoPriceService service) {
         mService = service;
     }
 
     @Override
-    public void onReceive(Context context, Intent intent)
-    {
-        switch (intent.getAction())
-        {
+    public void onReceive(Context context, Intent intent) {
+        switch (intent.getAction()) {
             case Intent.ACTION_SCREEN_OFF:
                 mService.handleScreenOff();
                 break;

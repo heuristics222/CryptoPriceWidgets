@@ -1,25 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-    android:orientation="horizontal">
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/appwidget_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/rounded_rect"
+    android:padding="3dp">
 
-    <ImageView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@drawable/gdax_logo_reverse"
-        android:adjustViewBounds="true"/>
+        android:layout_weight="0.5"
+        android:orientation="vertical">
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:src="@drawable/gdax_logo_reverse"
+            android:adjustViewBounds="true"/>
+    </LinearLayout>
 
-    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
-              android:id="@+id/appwidget_text"
-              android:layout_width="wrap_content"
-              android:layout_height="match_parent"
-              android:background="#80000000"
-              android:shadowColor="#94000000"
-              android:shadowDy="2"
-              android:shadowRadius="4"
-              android:textColor="#ffffffff"
-        android:layout_weight="1"
-        android:gravity="center">
-    </TextView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="0.5"
+        android:orientation="vertical">
+        <TextView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/appwidget_price"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.5"
+            android:shadowColor="#94000000"
+            android:shadowDy="2"
+            android:shadowRadius="6"
+            android:textColor="#ffffffff"
+            android:gravity="center"
+            android:textAlignment="center"
+            android:maxLines="1">
+        </TextView>
+        <TextView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/appwidget_conversion"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.5"
+            android:shadowColor="#94000000"
+            android:shadowDy="2"
+            android:shadowRadius="6"
+            android:textColor="#ccffffff"
+            android:gravity="center"
+            android:textAlignment="center"
+            android:maxLines="1">
+        </TextView>
+    </LinearLayout>
 </LinearLayout>

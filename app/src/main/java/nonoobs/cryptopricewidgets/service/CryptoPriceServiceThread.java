@@ -112,7 +112,6 @@ public class CryptoPriceServiceThread extends Thread {
     private PriceData mGdaxPrice = new PriceData();
 
     private void updateGDAXPrice(PriceData priceData) {
-        double price;
 
         priceData.unknown = true;
 
@@ -133,7 +132,7 @@ public class CryptoPriceServiceThread extends Thread {
             //JSONArray bids = (JSONArray) obj.get("bids");
             JSONArray asks = (JSONArray) obj.get("asks");
 
-            price = Double.parseDouble((String) ((JSONArray) asks.get(0)).get(0));
+            double price = Double.parseDouble((String) ((JSONArray) asks.get(0)).get(0));
 
             if (priceData.price != price) {
                 priceData.lastPrice = priceData.price;
@@ -156,8 +155,13 @@ public class CryptoPriceServiceThread extends Thread {
             color = color & 0x80FFFFFF;
         }
 
-        views.setTextViewText(R.id.appwidget_text, priceText);
-        views.setTextColor(R.id.appwidget_text, color);
+        views.setInt(R.id.appwidget_container, "setBackgroundResource", priceData.lastPrice < priceData.price ?
+                R.drawable.rounded_rect_green : R.drawable.rounded_rect_red);
+
+        views.setTextViewText(R.id.appwidget_price, priceText);
+        views.setTextColor(R.id.appwidget_price, color);
+        views.setTextViewText(R.id.appwidget_conversion, "USD/BTC");
+        //views.setTextColor(R.id.appwidget_conversion, color);
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(mService.getApplicationContext());
         appWidgetManager.updateAppWidget(new ComponentName(mService.getApplicationContext(), CryptoAppWidgetProvider.class), views);
     }

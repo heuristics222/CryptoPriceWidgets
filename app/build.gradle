@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "25.0.0"
+    buildToolsVersion '27.0.1'
     defaultConfig {
         applicationId "nonoobs.cryptopricewidgets"
         minSdkVersion 22
@@ -27,6 +27,7 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     compile 'com.rvalerio:fgchecker:1.1.0'
-    compile 'com.android.support:appcompat-v7:26.0.1'
+    compile 'com.android.support:appcompat-v7:26.0.2'
+    compile 'com.android.support:support-v4:26.0.2'
     testCompile 'junit:junit:4.12'
 }

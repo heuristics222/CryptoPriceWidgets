@@ -3,18 +3,22 @@ package nonoobs.cryptopricewidgets.service;
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
+import android.os.PowerManager;
 import android.widget.RemoteViews;
 
 import com.rvalerio.fgchecker.AppChecker;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashSet;
 
@@ -28,26 +32,18 @@ import nonoobs.cryptopricewidgets.R;
  */
 
 public class CryptoPriceServiceThread extends Thread {
-    private boolean mPaused = false;
     private boolean mStop = false;
     private Service mService;
 
     private HashSet<String> mHomeList;
 
+    double mOpenPrice = 0.0;
+    long mLastOpenUpdated = 0L;
+
+    double mCurrentPrice = -1.0;
+
     public CryptoPriceServiceThread(Service s) {
         mService = s;
-    }
-
-    public synchronized void pause() {
-        if (!mPaused) {
-            mPaused = true;
-            notify();
-        }
-    }
-
-    public synchronized void unpause() {
-        mPaused = false;
-        notify();
     }
 
     public synchronized void kill() {
@@ -59,26 +55,26 @@ public class CryptoPriceServiceThread extends Thread {
         refreshHomeList();
 
         while (!mStop) {
-            updateGDAXPrice(mGdaxPrice);
-            updateWidget(mGdaxPrice);
+            try {
+                updateHistoricalData();
+                updateGDAXPrice();
+                updateWidget();
 
-            CryptoAppWidgetLogger.info("Price updated: " + mGdaxPrice.price);
+                CryptoAppWidgetLogger.info("Price updated: " + mCurrentPrice);
 
-            synchronized (this) {
-                try {
-                    wait(isHomeShowing() ? 1000 : 5000);
-                } catch (InterruptedException e) {
-                }
-
-                while (mPaused && !mStop) {
-                    CryptoAppWidgetLogger.info("CryptoPriceServiceThread paused");
+                synchronized (this) {
                     try {
-                        wait();
+                        wait(isHomeShowing() ? 1000 : 5000);
                     } catch (InterruptedException e) {
                     }
-                    CryptoAppWidgetLogger.info("CryptoPriceServiceThread unpaused");
-                    refreshHomeList();
+
+                    if (!((PowerManager) mService.getApplicationContext().getSystemService(Context.POWER_SERVICE)).isInteractive()) {
+                        CryptoAppWidgetLogger.info("Stopping service");
+                        mService.stopSelf();
+                    }
                 }
+            } catch (Exception e) {
+                CryptoAppWidgetLogger.info(e.toString());
             }
         }
 
@@ -101,61 +97,47 @@ public class CryptoPriceServiceThread extends Thread {
         }
     }
 
-    private static final double INVALID_VALUE = -1.0;
+    private JSONObject get(String url) throws Exception {
+        URL u = new URL(url);
+        HttpURLConnection connection = (HttpURLConnection) u.openConnection();
 
-    class PriceData {
-        double price = INVALID_VALUE;
-        double lastPrice = INVALID_VALUE;
-        boolean unknown = true;
+        connection.setRequestMethod("GET");
+        connection.setConnectTimeout(1000);
+
+        connection.setReadTimeout(1000);
+        connection.connect();
+
+        BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
+        return new JSONObject(rd.readLine());
     }
 
-    private PriceData mGdaxPrice = new PriceData();
-
-    private void updateGDAXPrice(PriceData priceData) {
-
-        priceData.unknown = true;
-
-        try {
-            URL url = new URL("https://api.gdax.com/products/BTC-USD/book");
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-
-            connection.setRequestMethod("GET");
-            connection.setConnectTimeout(1000);
-            connection.setReadTimeout(1000);
-            connection.connect();
-
-            BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
-            JSONObject obj = new JSONObject(rd.readLine());
-
-            //{"sequence":2942300448,"bids":[["1624.98","1.13126808",5]],"asks":[["1624.99","11.26165044",1]]}
-
-            //JSONArray bids = (JSONArray) obj.get("bids");
-            JSONArray asks = (JSONArray) obj.get("asks");
-
-            double price = Double.parseDouble((String) ((JSONArray) asks.get(0)).get(0));
-
-            if (priceData.price != price) {
-                priceData.lastPrice = priceData.price;
-                priceData.price = price;
-            }
-
-            priceData.unknown = false;
-        } catch (Exception e) {
-            CryptoAppWidgetLogger.info(e.toString());
+    private void updateHistoricalData() throws Exception {
+        long time = System.currentTimeMillis();
+        if (time - mLastOpenUpdated > 60*60*1000) {
+            JSONObject obj = get("https://api.pro.coinbase.com/products/BTC-USD/stats");
+            mOpenPrice = Double.parseDouble((String) obj.get("open"));
+            mLastOpenUpdated = time;
+            CryptoAppWidgetLogger.info("Updating historical price: " + mOpenPrice);
         }
     }
 
-    private void updateWidget(PriceData priceData) {
+    private void updateGDAXPrice() throws Exception {
+        JSONObject obj = get("https://api.pro.coinbase.com/products/BTC-USD/book");
+        JSONArray asks = (JSONArray) obj.get("asks");
+        mCurrentPrice = Double.parseDouble((String) ((JSONArray) asks.get(0)).get(0));
+    }
+
+    private void updateWidget() {
         RemoteViews views = new RemoteViews(mService.getPackageName(), R.layout.crypto_widget);
 
-        String priceText = priceData.price == INVALID_VALUE ? "" : String.format("$%.2f", priceData.price);
-        int color = priceData.lastPrice < priceData.price ? 0xFF7EEB63 : 0xFFEB6439;
+        String priceText = mCurrentPrice < 0.0 ? "" : String.format("$%.2f", mCurrentPrice);
+        int color = mOpenPrice < mCurrentPrice ? 0xFF7EEB63 : 0xFFEB6439;
 
-        if (priceData.unknown) {
+        if (mCurrentPrice < 0.0) {
             color = color & 0x80FFFFFF;
         }
 
-        views.setInt(R.id.appwidget_container, "setBackgroundResource", priceData.lastPrice < priceData.price ?
+        views.setInt(R.id.appwidget_container, "setBackgroundResource", mOpenPrice < mCurrentPrice ?
                 R.drawable.rounded_rect_green : R.drawable.rounded_rect_red);
 
         views.setTextViewText(R.id.appwidget_price, priceText);

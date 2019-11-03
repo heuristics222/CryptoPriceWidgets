@@ -1,5 +1,7 @@
 package nonoobs.cryptopricewidgets;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
@@ -7,17 +9,20 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 
-import nonoobs.cryptopricewidgets.service.CryptoPriceService;
-
 /**
  * Created by Doug on 2017-05-04.
  */
 
 public class CryptoAppWidgetProvider extends AppWidgetProvider {
+
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         CryptoAppWidgetLogger.info("CryptoAppWidgetProvider.onUpdate called");
-        context.startService(new Intent(context, CryptoPriceService.class));
+
+        Intent intent = new Intent(context, RefreshActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
+
         super.onUpdate(context, appWidgetManager, appWidgetIds);
     }
 

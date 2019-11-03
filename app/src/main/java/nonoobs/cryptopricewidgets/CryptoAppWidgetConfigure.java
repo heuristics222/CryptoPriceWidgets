@@ -10,7 +10,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
-import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.RemoteViews;
 
@@ -24,35 +23,31 @@ public class CryptoAppWidgetConfigure extends Activity
 {
     int mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
 
-    public CryptoAppWidgetConfigure()
-    {
+    public CryptoAppWidgetConfigure() {
         super();
     }
 
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setResult(RESULT_CANCELED);
 
         setContentView(R.layout.crypto_widget_configure);
 
-        if(android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
                 && !hasUsageStatsPermission(getApplicationContext())) {
             startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
         }
 
         Intent intent = getIntent();
         Bundle extras = intent.getExtras();
-        if (extras != null)
-        {
+        if (extras != null) {
             mAppWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
         }
 
-        if (mAppWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID)
-        {
+        if (mAppWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
             finish();
         }
 

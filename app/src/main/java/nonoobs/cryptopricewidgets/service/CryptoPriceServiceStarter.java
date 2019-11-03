@@ -16,7 +16,7 @@ public class CryptoPriceServiceStarter extends BroadcastReceiver {
         switch (intent.getAction()) {
             case Intent.ACTION_MY_PACKAGE_REPLACED:
                 CryptoAppWidgetLogger.info("CryptoPriceServiceStarter received ACTION_MY_PACKAGE_REPLACED");
-                context.startService(new Intent(context, CryptoPriceService.class));
+                //context.startService(new Intent(context, CryptoPriceService.class));
                 break;
         }
     }

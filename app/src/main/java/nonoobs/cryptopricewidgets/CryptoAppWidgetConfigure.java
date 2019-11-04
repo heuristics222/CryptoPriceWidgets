@@ -1,7 +1,11 @@
 package nonoobs.cryptopricewidgets;
 
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.AppOpsManager;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
@@ -52,6 +56,11 @@ public class CryptoAppWidgetConfigure extends Activity
         }
 
         findViewById(R.id.button).setOnClickListener(mOnClickListener);
+
+        NotificationChannel channel = new NotificationChannel("CryptoUpdater", "CryptoUpdater", NotificationManager.IMPORTANCE_NONE);
+        channel.setDescription("Contains the crypto updater foreground service notification when it is running");
+        NotificationManager notificationManager = getSystemService(NotificationManager.class);
+        notificationManager.createNotificationChannel(channel);
     }
 
     boolean hasUsageStatsPermission(Context context) {
@@ -73,9 +82,6 @@ public class CryptoAppWidgetConfigure extends Activity
             Intent resultValue = new Intent();
             resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
             setResult(RESULT_OK, resultValue);
-
-            Intent serviceIntent = new Intent(getApplicationContext(), CryptoPriceService.class);
-            getApplicationContext().startService(serviceIntent);
 
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 

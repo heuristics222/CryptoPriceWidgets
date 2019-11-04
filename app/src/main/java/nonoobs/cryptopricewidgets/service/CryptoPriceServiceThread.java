@@ -32,6 +32,7 @@ import nonoobs.cryptopricewidgets.R;
  */
 
 public class CryptoPriceServiceThread extends Thread {
+    private boolean mPaused = false;
     private boolean mStop = false;
     private Service mService;
 
@@ -44,6 +45,18 @@ public class CryptoPriceServiceThread extends Thread {
 
     public CryptoPriceServiceThread(Service s) {
         mService = s;
+    }
+
+    public synchronized void pause() {
+        if (!mPaused) {
+            mPaused = true;
+            notify();
+        }
+    }
+
+    public synchronized void unpause() {
+        mPaused = false;
+        notify();
     }
 
     public synchronized void kill() {
@@ -68,9 +81,14 @@ public class CryptoPriceServiceThread extends Thread {
                     } catch (InterruptedException e) {
                     }
 
-                    if (!((PowerManager) mService.getApplicationContext().getSystemService(Context.POWER_SERVICE)).isInteractive()) {
-                        CryptoAppWidgetLogger.info("Stopping service");
-                        mService.stopSelf();
+                    while (mPaused && !mStop) {
+                        CryptoAppWidgetLogger.info("CryptoPriceServiceThread paused");
+                        try {
+                            wait();
+                        } catch (InterruptedException e) {
+                        }
+                        CryptoAppWidgetLogger.info("CryptoPriceServiceThread unpaused");
+                        refreshHomeList();
                     }
                 }
             } catch (Exception e) {
@@ -98,17 +116,20 @@ public class CryptoPriceServiceThread extends Thread {
     }
 
     private JSONObject get(String url) throws Exception {
-        URL u = new URL(url);
-        HttpURLConnection connection = (HttpURLConnection) u.openConnection();
+        try (AutoLogTimer x = new AutoLogTimer(url)) {
+            URL u = new URL(url);
+            HttpURLConnection connection = (HttpURLConnection) u.openConnection();
+            connection.setRequestProperty("connection", "Keep-Alive");
 
-        connection.setRequestMethod("GET");
-        connection.setConnectTimeout(1000);
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(1000);
 
-        connection.setReadTimeout(1000);
-        connection.connect();
+            connection.setReadTimeout(1000);
+            connection.connect();
 
-        BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
-        return new JSONObject(rd.readLine());
+            BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
+            return new JSONObject(rd.readLine());
+        }
     }
 
     private void updateHistoricalData() throws Exception {
@@ -143,7 +164,6 @@ public class CryptoPriceServiceThread extends Thread {
         views.setTextViewText(R.id.appwidget_price, priceText);
         views.setTextColor(R.id.appwidget_price, color);
         views.setTextViewText(R.id.appwidget_conversion, "USD/BTC");
-        //views.setTextColor(R.id.appwidget_conversion, color);
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(mService.getApplicationContext());
         appWidgetManager.updateAppWidget(new ComponentName(mService.getApplicationContext(), CryptoAppWidgetProvider.class), views);
     }

@@ -29,7 +29,9 @@ public class CryptoAppWidgetProvider extends AppWidgetProvider {
         intent.setAction("Click");
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.crypto_widget);
         views.setOnClickPendingIntent(R.id.appwidget_container, PendingIntent.getBroadcast(context, 0, intent, 0));
+        views.setOnClickPendingIntent(R.id.image, PendingIntent.getBroadcast(context, 0, intent, 0));
         appWidgetManager.updateAppWidget(new ComponentName(context, CryptoAppWidgetProvider.class), views);
+        appWidgetManager.updateAppWidget(appWidgetIds, views);
 
         super.onUpdate(context, appWidgetManager, appWidgetIds);
     }

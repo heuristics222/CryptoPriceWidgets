@@ -1,33 +1,53 @@
+apply plugin: 'com.google.protobuf'
 apply plugin: 'com.android.application'
 
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.21.7"
+    }
+    generateProtoTasks {
+        all().forEach {task ->
+            task.builtins {
+                java {
+                    option 'lite'
+                }
+            }
+        }
+    }
+}
+
 android {
-    compileSdkVersion 28
-    buildToolsVersion '28.0.3'
     defaultConfig {
         applicationId "nonoobs.cryptopricewidgets"
+        compileSdkVersion 35
         minSdkVersion 26
-        targetSdkVersion 28
+        targetSdkVersion 35
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         setProperty("archivesBaseName", "crypto_price_widgets")
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            crunchPngs false
         }
     }
     productFlavors {
     }
+    namespace "nonoobs.cryptopricewidgets"
+    compileOptions {
+        sourceCompatibility JavaVersion.current()
+        targetCompatibility JavaVersion.current()
+    }
+    compileSdk 35
 }
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'androidx.appcompat:appcompat:1.0.0'
-    implementation 'com.rvalerio:fgchecker:1.1.0'
-    androidTestImplementation('androidx.test.espresso:espresso-core:3.1.0', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-    testImplementation 'junit:junit:4.12'
+    implementation 'androidx.work:work-runtime:2.10.0'
+    implementation 'androidx.datastore:datastore:1.1.1'
+    implementation "androidx.datastore:datastore-preferences:1.1.1"
+    implementation "androidx.datastore:datastore-preferences-rxjava2:1.1.1"
+    implementation 'com.google.protobuf:protobuf-java:4.26.1'
 }

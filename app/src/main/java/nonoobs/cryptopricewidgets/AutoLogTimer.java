@@ -7,8 +7,8 @@ import java.io.Closeable;
  */
 
 public class AutoLogTimer implements Closeable {
-    private long mMillis;
-    private String mMessage;
+    private final long mMillis;
+    private final String mMessage;
 
     public AutoLogTimer(String message) {
         mMillis = System.currentTimeMillis();

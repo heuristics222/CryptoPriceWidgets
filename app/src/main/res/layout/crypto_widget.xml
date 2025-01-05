@@ -10,24 +10,24 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="match_parent"
+        android:layout_weight="0.5"
         android:orientation="vertical">
         <ImageView
-            android:id="@+id/image"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:src="@drawable/gdax_logo_reverse"
+            android:src="@drawable/coinbase_text"
             android:adjustViewBounds="true"/>
     </LinearLayout>
 
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.8"
+        android:layout_height="match_parent"
+        android:layout_weight="0.5"
         android:orientation="vertical">
         <TextView
+            xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/appwidget_price"
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -40,11 +40,10 @@
             android:textAlignment="center"
             android:maxLines="1"
             android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="12sp"
-            android:autoSizeMaxTextSize="100sp"
-            android:autoSizeStepGranularity="2sp">
+            android:autoSizeMinTextSize="6sp">
         </TextView>
         <TextView
+            xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/appwidget_conversion"
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -55,11 +54,7 @@
             android:textColor="#ccffffff"
             android:gravity="center"
             android:textAlignment="center"
-            android:maxLines="1"
-            android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="12sp"
-            android:autoSizeMaxTextSize="100sp"
-            android:autoSizeStepGranularity="2sp">
+            android:maxLines="1">
         </TextView>
     </LinearLayout>
 </LinearLayout>

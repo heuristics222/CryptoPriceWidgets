@@ -7,7 +7,6 @@
                     android:resizeMode="none"
                     android:widgetCategory="home_screen"
                     android:minResizeHeight="40dp"
-                    android:minResizeWidth="40dp"
-                    android:configure="nonoobs.cryptopricewidgets.CryptoAppWidgetConfigure">
+                    android:minResizeWidth="40dp">
 
 </appwidget-provider>
